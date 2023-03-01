@@ -10,9 +10,11 @@
 #include "ImageProcess.h"
 #include <chrono>
 #include <iostream>
+#include <thread>
+#include <mutex>
 
 using namespace std;
-
+using namespace chrono;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -84,6 +86,7 @@ BEGIN_MESSAGE_MAP(CStep4ProjectDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_IMAGE_PROCESS, &CStep4ProjectDlg::OnBnClickedBtnImageProcess)
 	ON_BN_CLICKED(IDC_BTN_MAKE_PATTERN, &CStep4ProjectDlg::OnBnClickedBtnMakePattern)
 	ON_BN_CLICKED(IDC_BTN_GET_DATA, &CStep4ProjectDlg::OnBnClickedBtnGetData)
+	ON_BN_CLICKED(IDC_BTN_THREAD_PROCESS, &CStep4ProjectDlg::OnBnClickedBtnThreadProcess)
 END_MESSAGE_MAP()
 
 
@@ -259,25 +262,23 @@ void CStep4ProjectDlg::OnBnClickedBtnTest()
 
 void CStep4ProjectDlg::OnBnClickedBtnImageProcess()
 {
-	using namespace chrono;
-
 	CImageProcess process;
 
-	steady_clock::time_point startTime = steady_clock::now();
+	steady_clock::time_point beginTime = steady_clock::now();
 	int nRet = process.GetStarInfo(&(m_pDlgImage->m_Image), COPY_COLOR_THRESHOLD);
 	steady_clock::time_point endTime = steady_clock::now();
-	
-	milliseconds millisec = duration_cast<milliseconds>(endTime - startTime); // ms(milli seconds) : 1 / 1,000 sec
+
+	milliseconds millisec = duration_cast<milliseconds>(endTime - beginTime); // ms(milli seconds) : 1 / 1,000 sec
 	if (millisec > steady_clock::duration::zero()) {
 		cout << "Star count :" << nRet << ", process time : " << millisec.count() << " milli seconds" << endl;
 	}
 	else {
-		microseconds microsec = duration_cast<microseconds>(endTime - startTime); // us(micro seconds) : 1 / 1,000,000 sec
+		microseconds microsec = duration_cast<microseconds>(endTime - beginTime); // us(micro seconds) : 1 / 1,000,000 sec
 		if (microsec > steady_clock::duration::zero()) {
 			cout << "Star count :" << nRet << ", process time : " << microsec.count() << " micro seconds" << endl;
 		}
 		else {
-			nanoseconds nanosec = duration_cast<nanoseconds>(endTime - startTime); // ns(nano seconds) : 1 / 10^9 sec
+			nanoseconds nanosec = duration_cast<nanoseconds>(endTime - beginTime); // ns(nano seconds) : 1 / 10^9 sec
 			cout << "Star count :" << nRet << ", process time : " << nanosec.count() << " nano seconds" << endl;
 		}
 
@@ -332,4 +333,77 @@ void CStep4ProjectDlg::OnBnClickedBtnGetData()
 	double dCenterY = (double)nSumY / nCount;
 
 	cout << "Center : " << dCenterX << ", " << dCenterY << endl;
+}
+
+void ThreadProcess(CWnd* pParent, CRect rect, int* nRet)
+{
+	CStep4ProjectDlg* pWnd = (CStep4ProjectDlg*)pParent;
+	if (pWnd) {
+		*nRet = pWnd->ProcessImg(rect);
+	}
+}
+
+void CStep4ProjectDlg::OnBnClickedBtnThreadProcess()
+{
+	steady_clock::time_point beginTime = steady_clock::now();
+
+	int nWidth = m_pDlgImage->m_Image.GetWidth() / 2;
+	int nHeight = m_pDlgImage->m_Image.GetHeight() / 2;
+	CRect rect(0, 0, nWidth, nHeight);
+	CRect rt[4];
+	int nRet[4] = {0, };
+
+	for (int k = 0; k < 4; k++) {
+		rt[k] = rect;
+		rt[k].OffsetRect(nWidth * (k % 2), nHeight * int(k / 2));
+	}
+
+	thread _thread0(ThreadProcess, this, rt[0], &nRet[0]);
+	thread _thread1(ThreadProcess, this, rt[1], &nRet[1]);
+	thread _thread2(ThreadProcess, this, rt[2], &nRet[2]);
+	thread _thread3(ThreadProcess, this, rt[3], &nRet[3]);
+
+	_thread0.join();
+	_thread1.join();
+	_thread2.join();
+	_thread3.join();
+
+	int nSum = 0;
+	for (int k = 0; k < 4; k++)
+		nSum += nRet[k];
+
+	steady_clock::time_point endTime = steady_clock::now();
+
+	microseconds microsec = duration_cast<microseconds>(endTime - beginTime); // us(micro seconds) : 1 / 1,000,000 sec
+	if (microsec > steady_clock::duration::zero()) {
+		cout << "Total star count :" << nSum << ", process time : " << microsec.count() << " micro seconds" << endl << endl;
+	}
+	else {
+		nanoseconds nanosec = duration_cast<nanoseconds>(endTime - beginTime); // ns(nano seconds) : 1 / 10^9 sec
+		cout << "Total star count :" << nSum << ", process time : " << nanosec.count() << " nano seconds" << endl << endl;
+	}
+}
+mutex mtxProcessPrint;
+int CStep4ProjectDlg::ProcessImg(CRect rect)
+{
+	CImageProcess process;
+
+	steady_clock::time_point beginTime = steady_clock::now();
+	int nRet = process.GetStarInfo(&(m_pDlgImage->m_Image), rect, COPY_COLOR_THRESHOLD);
+	steady_clock::time_point endTime = steady_clock::now();
+
+	microseconds microsec = duration_cast<microseconds>(endTime - beginTime); // us(micro seconds) : 1 / 1,000,000 sec
+	if (microsec > steady_clock::duration::zero()) {
+		mtxProcessPrint.lock();
+		cout << "Star count :" << nRet << ", process time : " << microsec.count() << " micro seconds" << endl;
+		mtxProcessPrint.unlock();
+	}
+	else {
+		nanoseconds nanosec = duration_cast<nanoseconds>(endTime - beginTime); // ns(nano seconds) : 1 / 10^9 sec
+		mtxProcessPrint.lock();
+		cout << "Star count :" << nRet << ", process time : " << nanosec.count() << " nano seconds" << endl;
+		mtxProcessPrint.unlock();
+	}
+
+	return nRet;
 }
