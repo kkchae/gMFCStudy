@@ -7,9 +7,12 @@
 #include "Step4Project.h"
 #include "Step4ProjectDlg.h"
 #include "afxdialogex.h"
+#include "ImageProcess.h"
+#include <chrono>
 #include <iostream>
 
 using namespace std;
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -78,6 +81,7 @@ BEGIN_MESSAGE_MAP(CStep4ProjectDlg, CDialogEx)
 	ON_BN_CLICKED(IDOK, &CStep4ProjectDlg::OnBnClickedOk)
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_BTN_TEST, &CStep4ProjectDlg::OnBnClickedBtnTest)
+	ON_BN_CLICKED(IDC_BTN_IMAGE_PROCESS, &CStep4ProjectDlg::OnBnClickedBtnImageProcess)
 END_MESSAGE_MAP()
 
 
@@ -248,4 +252,32 @@ void CStep4ProjectDlg::OnBnClickedBtnTest()
 
 	m_pDlgImage->Invalidate();
 	m_pDlgImageResult->Invalidate();
+}
+
+
+void CStep4ProjectDlg::OnBnClickedBtnImageProcess()
+{
+	using namespace chrono;
+
+	CImageProcess process;
+
+	steady_clock::time_point startTime = steady_clock::now();
+	int nRet = process.GetStarInfo(&(m_pDlgImage->m_Image), COPY_COLOR_THRESHOLD);
+	steady_clock::time_point endTime = steady_clock::now();
+	
+	milliseconds millisec = duration_cast<milliseconds>(endTime - startTime); // ms(milli seconds) : 1 / 1,000 sec
+	if (millisec > steady_clock::duration::zero()) {
+		cout << "Star count :" << nRet << ", process time : " << millisec.count() << " milli seconds" << endl;
+	}
+	else {
+		microseconds microsec = duration_cast<microseconds>(endTime - startTime); // us(micro seconds) : 1 / 1,000,000 sec
+		if (microsec > steady_clock::duration::zero()) {
+			cout << "Star count :" << nRet << ", process time : " << microsec.count() << " micro seconds" << endl;
+		}
+		else {
+			nanoseconds nanosec = duration_cast<nanoseconds>(endTime - startTime); // ns(nano seconds) : 1 / 10^9 sec
+			cout << "Star count :" << nRet << ", process time : " << nanosec.count() << " nano seconds" << endl;
+		}
+
+	}
 }

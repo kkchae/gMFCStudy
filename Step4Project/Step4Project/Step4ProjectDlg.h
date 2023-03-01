@@ -39,4 +39,5 @@ public:
 	afx_msg void OnDestroy();
 	void PrintMsg(CString& strMsg);
 	afx_msg void OnBnClickedBtnTest();
+	afx_msg void OnBnClickedBtnImageProcess();
 };
