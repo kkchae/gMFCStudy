@@ -15,6 +15,8 @@ public:
 	virtual ~CDlgImage();
 
 	CImage m_Image;
+	int m_nCoordDataSize;
+	CPoint m_ptCoordData[100];
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
@@ -30,5 +32,6 @@ public:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 	void InitImage(void);
+	void DrawData(CDC* pDC);
 	
 };

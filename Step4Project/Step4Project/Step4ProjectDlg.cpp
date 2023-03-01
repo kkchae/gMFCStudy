@@ -8,15 +8,16 @@
 #include "Step4ProjectDlg.h"
 #include "afxdialogex.h"
 #include <iostream>
+
 using namespace std;
 
 #ifdef _DEBUG
-	#define new DEBUG_NEW
-	#ifdef UNICODE
-		#pragma comment(linker, "/ENTRY:wWinMainCRTStartup /subsystem:console")
-	#else
-		#pragma comment(linker, "/ENTRY:WinMainCRTStartup /subsystem:console")
-	#endif
+#define new DEBUG_NEW
+#ifdef UNICODE
+#pragma comment(linker, "/ENTRY:wWinMainCRTStartup /subsystem:console")
+#else
+#pragma comment(linker, "/ENTRY:WinMainCRTStartup /subsystem:console")
+#endif
 #endif
 
 
@@ -211,6 +212,10 @@ void CStep4ProjectDlg::PrintMsg(CString& strMsg)
 
 void CStep4ProjectDlg::OnBnClickedBtnTest()
 {
+	if (m_pDlgImage == NULL)
+		AfxMessageBox(_T(""));
+
+
 	unsigned char* fm = (unsigned char*)m_pDlgImage->m_Image.GetBits();
 	int nWidth = m_pDlgImage->m_Image.GetWidth();
 	int nHeight = m_pDlgImage->m_Image.GetHeight();
@@ -229,8 +234,14 @@ void CStep4ProjectDlg::OnBnClickedBtnTest()
 	int nThreshHold = 100;
 	for (int j = 0; j < nHeight; j++) {
 		for (int i = 0; i < nWidth; i++) {
-			if (fm[j * nPitch + i] == 255)
-				nIndex++;
+			if (fm[j * nPitch + i] > nThreshHold) {
+				if (m_pDlgImageResult->m_nCoordDataSize <= 100) {
+					m_pDlgImageResult->m_ptCoordData[nIndex].x = i;
+					m_pDlgImageResult->m_ptCoordData[nIndex].y = j;
+					m_pDlgImageResult->m_nCoordDataSize = ++nIndex;
+				}
+			}
+
 		}
 	}
 	cout << "defect count : " << nIndex << endl;
