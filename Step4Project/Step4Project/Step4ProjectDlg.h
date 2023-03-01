@@ -10,6 +10,7 @@ class CStep4ProjectDlg : public CDialogEx
 {
 private:
 	CDlgImage* m_pDlgImage;
+	CDlgImage* m_pDlgImageResult;
 
 // 생성입니다.
 public:
@@ -37,4 +38,5 @@ public:
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnDestroy();
 	void PrintMsg(CString& strMsg);
+	afx_msg void OnBnClickedBtnTest();
 };

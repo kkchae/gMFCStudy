@@ -7,9 +7,16 @@
 #include "Step4Project.h"
 #include "Step4ProjectDlg.h"
 #include "afxdialogex.h"
+#include <iostream>
+using namespace std;
 
 #ifdef _DEBUG
-#define new DEBUG_NEW
+	#define new DEBUG_NEW
+	#ifdef UNICODE
+		#pragma comment(linker, "/ENTRY:wWinMainCRTStartup /subsystem:console")
+	#else
+		#pragma comment(linker, "/ENTRY:WinMainCRTStartup /subsystem:console")
+	#endif
 #endif
 
 
@@ -20,15 +27,15 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// 대화 상자 데이터입니다.
+	// 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
 
-// 구현입니다.
+	// 구현입니다.
 protected:
 	DECLARE_MESSAGE_MAP()
 };
@@ -53,6 +60,7 @@ END_MESSAGE_MAP()
 CStep4ProjectDlg::CStep4ProjectDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_STEP4PROJECT_DIALOG, pParent)
 	, m_pDlgImage(NULL)
+	, m_pDlgImageResult(NULL)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -68,6 +76,7 @@ BEGIN_MESSAGE_MAP(CStep4ProjectDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDOK, &CStep4ProjectDlg::OnBnClickedOk)
 	ON_WM_DESTROY()
+	ON_BN_CLICKED(IDC_BTN_TEST, &CStep4ProjectDlg::OnBnClickedBtnTest)
 END_MESSAGE_MAP()
 
 
@@ -103,9 +112,19 @@ BOOL CStep4ProjectDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+	// TODO 변수 define
+	MoveWindow(0, 0, 1280, 800);
+
+	// 좌측 다이얼로그
 	m_pDlgImage = new CDlgImage(this);
 	m_pDlgImage->Create(IDD_DLG_IMAGE, NULL);
 	m_pDlgImage->ShowWindow(SW_SHOW);
+
+	// 우측 다이얼로그
+	m_pDlgImageResult = new CDlgImage(this);
+	m_pDlgImageResult->Create(IDD_DLG_IMAGE, NULL);
+	m_pDlgImageResult->MoveWindow(640, 0, 640, 480);
+	m_pDlgImageResult->ShowWindow(SW_SHOW);
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -168,8 +187,8 @@ void CStep4ProjectDlg::OnBnClickedOk()
 	//dlgImage.DoModal();
 
 	/* Non Modal */
-	m_pDlgImage->ShowWindow(SW_SHOW);
-	 
+	//m_pDlgImage->ShowWindow(SW_SHOW);
+
 }
 
 
@@ -179,9 +198,43 @@ void CStep4ProjectDlg::OnDestroy()
 
 	if (m_pDlgImage)
 		delete m_pDlgImage;
+
+	if (m_pDlgImageResult)
+		delete m_pDlgImageResult;
 }
 
 void CStep4ProjectDlg::PrintMsg(CString& strMsg)
 {
 	AfxMessageBox(strMsg);
+}
+
+
+void CStep4ProjectDlg::OnBnClickedBtnTest()
+{
+	unsigned char* fm = (unsigned char*)m_pDlgImage->m_Image.GetBits();
+	int nWidth = m_pDlgImage->m_Image.GetWidth();
+	int nHeight = m_pDlgImage->m_Image.GetHeight();
+	int nPitch = m_pDlgImage->m_Image.GetPitch();
+	int x, y = 0;
+
+	memset(fm, RGB(0, 0, 0), 640 * 480);
+
+	for (int k = 0; k < 100; k++) {
+		x = rand() % nWidth;
+		y = rand() % nHeight;
+		fm[y * nPitch + x] = 255;
+	}
+
+	int nIndex = 0;
+	int nThreshHold = 100;
+	for (int j = 0; j < nHeight; j++) {
+		for (int i = 0; i < nWidth; i++) {
+			if (fm[j * nPitch + i] == 255)
+				nIndex++;
+		}
+	}
+	cout << "defect count : " << nIndex << endl;
+
+	m_pDlgImage->Invalidate();
+	m_pDlgImageResult->Invalidate();
 }
