@@ -40,4 +40,6 @@ public:
 	void PrintMsg(CString& strMsg);
 	afx_msg void OnBnClickedBtnTest();
 	afx_msg void OnBnClickedBtnImageProcess();
+	afx_msg void OnBnClickedBtnMakePattern();
+	afx_msg void OnBnClickedBtnGetData();
 };

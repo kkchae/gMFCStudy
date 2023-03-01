@@ -82,6 +82,8 @@ BEGIN_MESSAGE_MAP(CStep4ProjectDlg, CDialogEx)
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_BTN_TEST, &CStep4ProjectDlg::OnBnClickedBtnTest)
 	ON_BN_CLICKED(IDC_BTN_IMAGE_PROCESS, &CStep4ProjectDlg::OnBnClickedBtnImageProcess)
+	ON_BN_CLICKED(IDC_BTN_MAKE_PATTERN, &CStep4ProjectDlg::OnBnClickedBtnMakePattern)
+	ON_BN_CLICKED(IDC_BTN_GET_DATA, &CStep4ProjectDlg::OnBnClickedBtnGetData)
 END_MESSAGE_MAP()
 
 
@@ -280,4 +282,54 @@ void CStep4ProjectDlg::OnBnClickedBtnImageProcess()
 		}
 
 	}
+}
+
+
+void CStep4ProjectDlg::OnBnClickedBtnMakePattern()
+{
+	unsigned char* fm = (unsigned char*)m_pDlgImage->m_Image.GetBits();
+	int nWidth = m_pDlgImage->m_Image.GetWidth();
+	int nHeight = m_pDlgImage->m_Image.GetHeight();
+	int nPitch = m_pDlgImage->m_Image.GetPitch();
+
+	memset(fm, COLOR_BLACK, INNER_WINDOW_WIDTH * INNER_WINDOW_HEIGHT);
+
+	CRect rect(100, 100, 200, 200);
+	for (int j = rect.top; j < rect.bottom; j++) {
+		for (int i = rect.left; i < rect.right; i++) {
+			fm[j * nPitch + i] = rand() % 256;
+		}
+
+	}
+
+	m_pDlgImage->Invalidate();
+}
+
+
+void CStep4ProjectDlg::OnBnClickedBtnGetData()
+{
+	unsigned char* fm = (unsigned char*)m_pDlgImage->m_Image.GetBits();
+	int nWidth = m_pDlgImage->m_Image.GetWidth();
+	int nHeight = m_pDlgImage->m_Image.GetHeight();
+	int nPitch = m_pDlgImage->m_Image.GetPitch();
+
+	int nTh = 0x80;
+	int nSumX = 0;
+	int nSumY = 0;
+	int nCount = 0;
+	CRect rect(0, 0, nWidth, nHeight);
+	for (int j = rect.top; j < rect.bottom; j++) {
+		for (int i = rect.left; i < rect.right; i++) {
+			if (fm[j * nPitch + i] > nTh) {
+				nSumX += i;
+				nSumY += j;
+				nCount++;
+			}
+		}
+	}
+
+	double dCenterX = (double)nSumX / nCount;
+	double dCenterY = (double)nSumY / nCount;
+
+	cout << "Center : " << dCenterX << ", " << dCenterY << endl;
 }
