@@ -114,7 +114,7 @@ BOOL CStep4ProjectDlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 	// TODO 변수 define
-	MoveWindow(0, 0, 1280, 800);
+	MoveWindow(0, 0, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
 
 	// 좌측 다이얼로그
 	m_pDlgImage = new CDlgImage(this);
@@ -124,7 +124,7 @@ BOOL CStep4ProjectDlg::OnInitDialog()
 	// 우측 다이얼로그
 	m_pDlgImageResult = new CDlgImage(this);
 	m_pDlgImageResult->Create(IDD_DLG_IMAGE, NULL);
-	m_pDlgImageResult->MoveWindow(640, 0, 640, 480);
+	m_pDlgImageResult->MoveWindow(INNER_WINDOW_WIDTH, 0, INNER_WINDOW_WIDTH, INNER_WINDOW_HEIGHT);
 	m_pDlgImageResult->ShowWindow(SW_SHOW);
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
@@ -212,9 +212,10 @@ void CStep4ProjectDlg::PrintMsg(CString& strMsg)
 
 void CStep4ProjectDlg::OnBnClickedBtnTest()
 {
-	if (m_pDlgImage == NULL)
-		AfxMessageBox(_T(""));
-
+	if (m_pDlgImage == NULL) {
+		cout << "[ERROR] " << "m_pDlgImage : NULL" << endl;
+		return;
+	}
 
 	unsigned char* fm = (unsigned char*)m_pDlgImage->m_Image.GetBits();
 	int nWidth = m_pDlgImage->m_Image.GetWidth();
@@ -222,20 +223,19 @@ void CStep4ProjectDlg::OnBnClickedBtnTest()
 	int nPitch = m_pDlgImage->m_Image.GetPitch();
 	int x, y = 0;
 
-	memset(fm, RGB(0, 0, 0), 640 * 480);
+	memset(fm, COLOR_BLACK, INNER_WINDOW_WIDTH * INNER_WINDOW_HEIGHT);
 
-	for (int k = 0; k < 100; k++) {
+	for (int k = 0; k < MAX_GEN_POINT; k++) {
 		x = rand() % nWidth;
 		y = rand() % nHeight;
-		fm[y * nPitch + x] = 255;
+		fm[y * nPitch + x] = rand() % (255 + 1);
 	}
 
 	int nIndex = 0;
-	int nThreshHold = 100;
 	for (int j = 0; j < nHeight; j++) {
 		for (int i = 0; i < nWidth; i++) {
-			if (fm[j * nPitch + i] > nThreshHold) {
-				if (m_pDlgImageResult->m_nCoordDataSize <= 100) {
+			if (fm[j * nPitch + i] > COPY_COLOR_THRESHOLD) {
+				if (nIndex < MAX_GEN_POINT) {
 					m_pDlgImageResult->m_ptCoordData[nIndex].x = i;
 					m_pDlgImageResult->m_ptCoordData[nIndex].y = j;
 					m_pDlgImageResult->m_nCoordDataSize = ++nIndex;

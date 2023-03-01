@@ -3,6 +3,7 @@
 
 // CDlgImage 대화 상자
 
+
 class CDlgImage : public CDialogEx
 {
 	DECLARE_DYNAMIC(CDlgImage)
@@ -16,7 +17,7 @@ public:
 
 	CImage m_Image;
 	int m_nCoordDataSize;
-	CPoint m_ptCoordData[100];
+	CPoint m_ptCoordData[MAX_GEN_POINT];
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME

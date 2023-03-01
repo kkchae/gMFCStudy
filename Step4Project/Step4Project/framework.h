@@ -28,11 +28,15 @@
 #include <afxcontrolbars.h>     // MFC의 리본 및 컨트롤 막대 지원
 
 
-
-
-
-
-
+#define MAX_GEN_POINT			500					// 최대 생성 포인트 개수
+#define COLOR_WHITE				RGB(255, 255, 255)	// white
+#define COLOR_BLACK				RGB(0, 0, 0)		// black
+#define COLOR_RED				RGB(255,0,0)		// red
+#define MAIN_WINDOW_WIDTH		1280				// 기본 다이얼로그 가로 크기
+#define MAIN_WINDOW_HEIGHT		800					// 기본 다이얼로그 세로 크기
+#define INNER_WINDOW_WIDTH		640					// 내부 다이얼로그 가로 크기
+#define INNER_WINDOW_HEIGHT		480					// 내부 다이얼로그 세로 크기
+#define COPY_COLOR_THRESHOLD	100					// 우측 윈도우로 복제할 color 기준값
 
 
 #ifdef _UNICODE

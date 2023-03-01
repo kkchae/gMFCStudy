@@ -52,7 +52,7 @@ BOOL CDlgImage::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
-	MoveWindow(0, 0, 640, 480);
+	MoveWindow(0, 0, INNER_WINDOW_WIDTH, INNER_WINDOW_HEIGHT);
 	InitImage();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -74,8 +74,8 @@ void CDlgImage::OnPaint()
 
 void CDlgImage::InitImage(void)
 {
-	int nWidth = 640;
-	int nHeight = 480;
+	int nWidth = INNER_WINDOW_WIDTH;
+	int nHeight = INNER_WINDOW_HEIGHT;
 	int nBpp = 8;
 
 	m_Image.Create(nWidth, -nHeight, nBpp);
@@ -91,15 +91,14 @@ void CDlgImage::InitImage(void)
 	int nPitch = m_Image.GetPitch();
 	//cout << _T("nPitch =") <<  nPitch << endl;
 
-	int nColor = RGB(255, 255, 255); //RGB(0, 0, 0);
-	memset(fm, nColor, sizeof(unsigned char) * nWidth * nHeight);
+	memset(fm, COLOR_WHITE, sizeof(unsigned char) * nWidth * nHeight);
 }
 
 void CDlgImage::DrawData(CDC* pDC)
 {
 	if (pDC) {
 		CPen pen;
-		pen.CreatePen(PS_SOLID, 1, RGB(255, 0, 0)); // Red
+		pen.CreatePen(PS_SOLID, 1, COLOR_RED);
 		CPen* oldPen = pDC->SelectObject(&pen);
 
 		CRect rect;
