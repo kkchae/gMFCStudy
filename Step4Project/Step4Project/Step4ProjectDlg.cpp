@@ -125,6 +125,7 @@ BOOL CStep4ProjectDlg::OnInitDialog()
 	// TODO 변수 define
 	MoveWindow(0, 0, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
 
+
 	// 좌측 다이얼로그
 	m_pDlgImage = new CDlgImage(this);
 	m_pDlgImage->Create(IDD_DLG_IMAGE, NULL);
